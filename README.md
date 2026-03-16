@@ -42,7 +42,7 @@ O sistema contará com dois tipos de eventos:
 
 ## Modelagem do banco
 
-
+https://app.diagrams.net/#G1jzJHRbO3KRjyWieyrtjlkKJz8P1i-LnQ#%7B%22pageId%22%3A%226xSJDgpksOZ6mtiG3P4E%22%7D
 
 ## Planejamento de Sprints
 
