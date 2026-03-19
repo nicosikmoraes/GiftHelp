@@ -47,7 +47,11 @@ O sistema contará com dois tipos de eventos:
 
 ## Prototipagem de telas
 
+### Excalidraw / Fluxos
 https://excalidraw.com/#json=oyWilCEpC4YSPySMdzDUy,Gx9Yd7W4fivKAeXkq3ZSDg
+
+### Figma / Layout
+https://www.figma.com/design/m9L6NqOqb86mtJ9M0yajCF/GiftHelper?node-id=0-1&p=f&t=szYYcxG5XylHqagM-0
 
 ## Planejamento de Sprints
 
