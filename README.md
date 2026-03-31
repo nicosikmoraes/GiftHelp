@@ -2,7 +2,7 @@
 
 ## Sobre o app
 
-O GiftHub é um aplicativo móvel desenvolvido com React Native utilizando Expo e Laravel, com o objetivo de facilitar a organização de presentes em eventos como aniversários, amigo secreto e Natal.
+O GiftHelp é um aplicativo móvel desenvolvido com React Native utilizando Expo e Laravel, com o objetivo de facilitar a organização de presentes em eventos como aniversários, amigo secreto e Natal.
 
 O aplicativo permite que cada usuário crie um perfil com informações úteis para escolha de presentes, como tamanho de roupas, tamanho de calçados, preferências de estilo e itens que não utiliza.
 
@@ -10,7 +10,7 @@ Além disso, o sistema permite a criação de eventos onde os participantes pode
 
 ### Funcionalidades principais
 
-- [ ] Criar conta de usuário
+- [x] Autenticação usuário
 - [ ] Editar perfil
 - [ ] Informar preferências pessoais (roupa, calçado, estilo, etc)
 - [ ] Criar eventos
@@ -57,7 +57,7 @@ https://www.figma.com/design/m9L6NqOqb86mtJ9M0yajCF/GiftHelper?node-id=0-1&p=f&t
 
 ## Planejamento de Sprints
 
-### Sprint 1 (Semana 1)
+### Sprint 1 (Semana 1) - 30/03/2026 
 
 - Criar repositório no GitHub
 - Criar tela de login/registro
