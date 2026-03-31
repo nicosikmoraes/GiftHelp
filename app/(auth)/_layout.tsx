@@ -1,0 +1,27 @@
+import { Redirect, Stack } from "expo-router";
+import { useContext } from "react";
+import { AuthContext, AuthProvider } from "../../context/AuthContext";
+import "../../global.css";
+
+export default function AppLayout() {
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) return null;
+
+  if (!user) {
+    console.log("User not authenticate");
+    return <Redirect href="/login" />;
+  }
+
+  return (
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerTitle: "",
+          headerShadowVisible: false,
+          headerShown: false,
+        }}
+      />
+    </AuthProvider>
+  );
+}
