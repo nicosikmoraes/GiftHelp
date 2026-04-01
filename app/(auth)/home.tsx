@@ -1,31 +1,75 @@
-import CenteredTemplate from "@/components/template/Default";
-import PressableComponent from "@/components/ui/Pressable";
-import TextComponent from "@/components/ui/Text";
+import BlankTemplate from "@/components/template/Blank";
+import InputComponent from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import TitleComponent from "@/components/ui/Title";
 import { useAuth } from "@/hooks/useAuth";
-import { router } from "expo-router";
-import { StyleSheet } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 export default function Home() {
-  const { signOut } = useAuth();
   const { user } = useAuth();
-
-  async function handleLogOut() {
-    await signOut();
-  }
+  const [shirtSize, setShirtSize] = useState("");
+  const [PantsSize, setPantsSize] = useState("");
 
   return (
-    <CenteredTemplate>
-      <TextComponent message={`Welcome ${user?.name}`} />
+    <BlankTemplate>
+      <View style={styles.avatar_container}>
+        <TitleComponent message="PROFILE" fontSize={20} />
 
-      <PressableComponent message="Exit" width={120} onPress={handleLogOut} />
+        <View style={styles.avatar}></View>
+      </View>
 
-      <PressableComponent
-        message="Events"
-        width={120}
-        onPress={() => router.push("/(auth)/events")}
-      />
-    </CenteredTemplate>
+      <TitleComponent message="PERSON INFORMATIONS" fontSize={20} />
+
+      <View style={styles.person_informations_container}>
+        <Select
+          value={shirtSize}
+          onChange={setShirtSize}
+          options={[
+            { label: "PP", value: "PP" },
+            { label: "P", value: "P" },
+            { label: "M", value: "M" },
+            { label: "G", value: "G" },
+            { label: "GG", value: "GG" },
+          ]}
+          width={120}
+          label="Shirt Size"
+          placeholder="Size"
+        />
+
+        <InputComponent
+          label="Pants Size"
+          width={120}
+          placeholder="Size"
+          value={PantsSize}
+          onChangeText={(text) => {
+            setPantsSize(text);
+          }}
+        />
+      </View>
+    </BlankTemplate>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  avatar: {
+    backgroundColor: "#F6BBC1",
+    height: 300,
+    width: 100,
+    marginTop: 50,
+    marginBottom: 50,
+    borderRadius: 100,
+  },
+
+  avatar_container: {
+    display: "flex",
+    alignItems: "center",
+  },
+
+  person_informations_container: {
+    marginTop: 20,
+    display: "flex",
+    flexDirection: "row",
+    gap: "3%",
+  },
+});

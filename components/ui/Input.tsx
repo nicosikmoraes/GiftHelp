@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 import ErrorComponent from "./Error";
+import TextComponent from "./Text";
 
 type Props = TextInputProps & {
   borderColor?: string;
@@ -9,6 +10,7 @@ type Props = TextInputProps & {
   height?: any;
   borderRadius?: number;
   error?: string;
+  label?: string;
 };
 
 export default function InputComponent({
@@ -18,12 +20,16 @@ export default function InputComponent({
   borderRadius = 4,
   borderError = "transparent",
   error,
+  label = "",
   ...props
 }: Props) {
   const [focused, setFocused] = useState(false);
 
   return (
     <View>
+      <View style={[{ marginBottom: 5 }, { width: width }]}>
+        <TextComponent message={label} textAlign="left" />
+      </View>
       <TextInput
         style={[
           styles.input,

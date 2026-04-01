@@ -6,11 +6,11 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function CenteredTemplate({ children }: Props) {
+export default function BlankTemplate({ children }: Props) {
   return (
     <View style={styles.container}>
       <Header />
-      <View style={styles.container_children}>{children}</View>
+      <View>{children}</View>
     </View>
   );
 }
@@ -20,12 +20,5 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#0F0F0F",
-  },
-  container_children: {
-    gap: 10,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 0,
   },
 });
