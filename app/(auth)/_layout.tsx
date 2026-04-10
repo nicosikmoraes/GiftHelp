@@ -20,6 +20,9 @@ export default function AppLayout() {
           headerTitle: "",
           headerShadowVisible: false,
           headerShown: false,
+          contentStyle: {
+            backgroundColor: "#0F0F0F",
+          },
         }}
       />
     </AuthProvider>

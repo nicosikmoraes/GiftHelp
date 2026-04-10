@@ -1,12 +1,12 @@
-import CenteredTemplate from "@/components/template/Default";
+import BlankTemplate from "@/components/template/Blank";
 import TextComponent from "@/components/ui/Text";
 import { StyleSheet } from "react-native";
 
 export default function Events() {
   return (
-    <CenteredTemplate>
+    <BlankTemplate>
       <TextComponent message="EVENTS" />
-    </CenteredTemplate>
+    </BlankTemplate>
   );
 }
 

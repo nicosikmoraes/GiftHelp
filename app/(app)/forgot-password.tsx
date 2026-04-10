@@ -38,7 +38,7 @@ export default function ForgotPassword() {
   return (
     <CenteredTemplate>
       <View style={styles.title_container}>
-        <TitleComponent message="Reset your password" fontSize={30} />
+        <TitleComponent message="Reset your password" fontSize={24} />
 
         <TextComponent
           message="Insert your email"

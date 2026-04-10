@@ -8,7 +8,7 @@ type Props = {
 
 export default function CenteredTemplate({ children }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width: "100%" }]}>
       <Header />
       <View style={styles.container_children}>{children}</View>
     </View>
@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 0,
+    marginTop: 40,
   },
 });

@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import TextComponent from "./Text";
 
 type Option = {
@@ -28,12 +35,33 @@ export default function Select({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [search, setSearch] = useState("");
 
   const selected = options.find((opt) => opt.value === value);
 
+  const filteredOptions = options.filter((opt) =>
+    opt.label.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  function handleOpen() {
+    setOpen(true);
+    setFocused(true);
+    setSearch("");
+  }
+
+  function handleClose() {
+    setOpen(false);
+    setFocused(false);
+  }
+
   return (
-    <View style={{ width: width }}>
+    <View style={{ width, position: "relative" }}>
       <TextComponent message={label} textAlign="left" />
+
+      {/* Overlay (fecha ao clicar fora) */}
+      {open && <Pressable style={styles.overlay} onPress={handleClose} />}
+
+      {/* Campo */}
       <Pressable
         style={[
           styles.select,
@@ -42,36 +70,45 @@ export default function Select({
             marginTop: 5,
           },
         ]}
-        onPress={() => {
-          setOpen(!open);
-          setFocused(true);
-        }}
+        onPress={handleOpen}
       >
-        <Text style={styles.text}>
-          {selected ? selected.label : placeholder}
-        </Text>
+        <TextInput
+          style={styles.text}
+          placeholder={placeholder}
+          placeholderTextColor="#666"
+          value={open ? search : selected?.label || ""}
+          onChangeText={setSearch}
+          onFocus={handleOpen}
+        />
       </Pressable>
 
+      {/* Dropdown */}
       {open && (
         <View style={styles.dropdown}>
-          <FlatList
-            data={options}
-            keyExtractor={(item) => item.value}
-            renderItem={({ item }) => (
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  onChange(item.value);
-                  setOpen(false);
-                  setFocused(false);
-                }}
-              >
-                <Text style={styles.text}>{item.label}</Text>
-              </Pressable>
-            )}
-          />
+          {filteredOptions.length === 0 ? (
+            <Text style={styles.empty}>No results found</Text>
+          ) : (
+            <FlatList
+              data={filteredOptions}
+              keyExtractor={(item) => item.value}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    onChange(item.value);
+                    setSearch(item.label);
+                    handleClose();
+                  }}
+                >
+                  <Text style={styles.text}>{item.label}</Text>
+                </Pressable>
+              )}
+            />
+          )}
         </View>
       )}
+
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
@@ -80,11 +117,10 @@ export default function Select({
 const styles = StyleSheet.create({
   select: {
     borderWidth: 1,
-    padding: 12,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
     backgroundColor: "#1A1A1A",
     height: 45,
-    display: "flex",
     justifyContent: "center",
   },
 
@@ -94,20 +130,37 @@ const styles = StyleSheet.create({
   },
 
   dropdown: {
-    marginTop: 5,
+    position: "absolute",
+    top: 70,
+    width: "100%",
     borderWidth: 1,
     borderColor: "#333",
-    borderRadius: 8,
+    borderRadius: 4,
     backgroundColor: "#1A1A1A",
-    maxHeight: 125,
+    maxHeight: 150,
+    zIndex: 999,
+    elevation: 10,
   },
 
   option: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
-    display: "flex",
-    justifyContent: "center",
+  },
+
+  overlay: {
+    position: "absolute",
+    top: -1000,
+    bottom: -1000,
+    left: -1000,
+    right: -1000,
+    zIndex: 998,
+  },
+
+  empty: {
+    color: "#666",
+    padding: 12,
+    textAlign: "center",
   },
 
   error: {

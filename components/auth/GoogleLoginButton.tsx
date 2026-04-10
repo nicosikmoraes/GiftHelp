@@ -48,23 +48,25 @@ export default function GoogleLoginButton() {
   if (!fontsLoaded) return null;
 
   return (
-    <Pressable
-      onPress={() => promptAsync()}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-    >
-      <View style={styles.content}>
-        {/* 🔥 Ícone do Google */}
-        <Image
-          source={{
-            uri: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg",
-          }}
-          style={styles.icon}
-        />
+    <View style={{ marginBottom: 0 }}>
+      <Pressable
+        onPress={() => promptAsync()}
+        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      >
+        <View style={styles.content}>
+          {/* 🔥 Ícone do Google */}
+          <Image
+            source={{
+              uri: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+            }}
+            style={styles.icon}
+          />
 
-        <Text style={styles.text}>{"Login with Google"}</Text>
-        <View style={styles.icon}></View>
-      </View>
-    </Pressable>
+          <Text style={styles.text}>{"Login with Google"}</Text>
+          <View style={styles.icon}></View>
+        </View>
+      </Pressable>
+    </View>
   );
 }
 
@@ -94,7 +96,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-around",
     width: "100%",
-    gap: 10,
   },
 
   icon: {

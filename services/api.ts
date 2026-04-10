@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 export const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://192.168.3.154:8000/api",
 });
 
 api.interceptors.response.use(

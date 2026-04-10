@@ -7,13 +7,15 @@ export default function Header() {
   const canGoBack = router.canGoBack();
 
   return (
-    <View style={styles.container}>
+    <>
       {canGoBack && (
-        <Pressable onPress={() => router.back()} style={styles.arrow_btn}>
-          <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
-        </Pressable>
+        <View style={styles.container}>
+          <Pressable onPress={() => router.back()} style={styles.arrow_btn}>
+            <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
+          </Pressable>
+        </View>
       )}
-    </View>
+    </>
   );
 }
 
@@ -22,6 +24,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: "#0F0F0F",
     justifyContent: "center",
+    marginTop: 30,
   },
 
   arrow_btn: {

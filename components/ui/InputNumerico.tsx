@@ -12,9 +12,10 @@ type Props = TextInputProps & {
   error?: string;
   label?: string;
   marginBottom?: number;
+  amount?: number;
 };
 
-export default function InputComponent({
+export default function InputNumberComponent({
   borderColor = "#E65C00",
   width = "100%",
   height = 45,
@@ -23,9 +24,24 @@ export default function InputComponent({
   error,
   marginBottom = 0,
   label = "",
+  amount = 2,
+  onChangeText,
+  value,
   ...props
 }: Props) {
   const [focused, setFocused] = useState(false);
+
+  function handleChange(text: string) {
+    let onlyNumbers = text.replace(/[^0-9]/g, "");
+
+    if (onlyNumbers.length > amount) {
+      onlyNumbers = onlyNumbers.slice(0, amount);
+    }
+
+    onlyNumbers = onlyNumbers.replace(/^0+(\d)/, "$1");
+
+    onChangeText?.(onlyNumbers);
+  }
 
   return (
     <View style={{ width: width, marginBottom: marginBottom }}>
@@ -34,10 +50,11 @@ export default function InputComponent({
           <TextComponent message={label} textAlign="left" />
         </View>
       )}
+
       <TextInput
+        value={value}
         style={[
           styles.input,
-          { outlineWidth: 0 },
           { borderColor: focused ? borderColor : borderError },
           { borderWidth: focused ? 2 : 1 },
           { width: "100%" },
@@ -46,6 +63,8 @@ export default function InputComponent({
         ]}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        onChangeText={handleChange}
+        keyboardType="numeric"
         placeholderTextColor="#B3B3B3"
         selectionColor={borderColor}
         underlineColorAndroid="transparent"
@@ -63,6 +82,5 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#1A1A1A",
     color: "#B3B3B3",
-    zIndex: 2,
   },
 });

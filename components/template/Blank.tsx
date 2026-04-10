@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import Toast from "../ui/Toast/Toast";
+import FooterDefault from "./FooterDefault";
 import Header from "./Header";
-
 type Props = {
   children: React.ReactNode;
 };
@@ -9,8 +10,19 @@ type Props = {
 export default function BlankTemplate({ children }: Props) {
   return (
     <View style={styles.container}>
-      <Header />
-      <View>{children}</View>
+      <View style={styles.header}>
+        <Header />
+      </View>
+      <Toast />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={20} // 🔥 importante
+      >
+        <View style={{ flex: 1 }}>{children}</View>
+      </KeyboardAvoidingView>
+
+      <FooterDefault />
     </View>
   );
 }
@@ -18,7 +30,9 @@ export default function BlankTemplate({ children }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#0F0F0F",
+  },
+  header: {
+    padding: 20,
   },
 });

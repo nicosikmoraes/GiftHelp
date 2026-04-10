@@ -5,7 +5,14 @@ import "../global.css";
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: "#0F0F0F",
+          },
+        }}
+      />
     </AuthProvider>
   );
 }

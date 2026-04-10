@@ -1,52 +1,38 @@
+import PersonalInformations from "@/components/home/PersonalInformations";
 import BlankTemplate from "@/components/template/Blank";
-import InputComponent from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
 import TitleComponent from "@/components/ui/Title";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function Home() {
   const { user } = useAuth();
   const [shirtSize, setShirtSize] = useState("");
   const [PantsSize, setPantsSize] = useState("");
+  const [ShoeSize, setShoeSize] = useState("");
+  const [RingSize, setRingSize] = useState("");
+  const [preferredColor, setPreferredColor] = useState("");
+
+  function handlePersonalInformations() {}
 
   return (
     <BlankTemplate>
-      <View style={styles.avatar_container}>
-        <TitleComponent message="PROFILE" fontSize={20} />
+      <ScrollView
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: 120,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.avatar_container}>
+          <TitleComponent message="PROFILE" fontSize={20} />
 
-        <View style={styles.avatar}></View>
-      </View>
+          <View style={styles.avatar}></View>
+        </View>
 
-      <TitleComponent message="PERSON INFORMATIONS" fontSize={20} />
-
-      <View style={styles.person_informations_container}>
-        <Select
-          value={shirtSize}
-          onChange={setShirtSize}
-          options={[
-            { label: "PP", value: "PP" },
-            { label: "P", value: "P" },
-            { label: "M", value: "M" },
-            { label: "G", value: "G" },
-            { label: "GG", value: "GG" },
-          ]}
-          width={120}
-          label="Shirt Size"
-          placeholder="Size"
-        />
-
-        <InputComponent
-          label="Pants Size"
-          width={120}
-          placeholder="Size"
-          value={PantsSize}
-          onChangeText={(text) => {
-            setPantsSize(text);
-          }}
-        />
-      </View>
+        <PersonalInformations />
+      </ScrollView>
     </BlankTemplate>
   );
 }
@@ -70,6 +56,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     display: "flex",
     flexDirection: "row",
-    gap: "3%",
+    gap: 5,
   },
 });
