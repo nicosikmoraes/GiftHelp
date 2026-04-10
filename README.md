@@ -12,7 +12,7 @@ Além disso, o sistema permite a criação de eventos onde os participantes pode
 
 - [x] Autenticação usuário
 - [ ] Editar perfil
-- [ ] Informar preferências pessoais (roupa, calçado, estilo, etc)
+- [x] Informar preferências pessoais (roupa, calçado, estilo, etc)
 - [ ] Criar eventos
 - [ ] Convidar participantes para eventos
 - [ ] Adicionar sugestões de presentes
