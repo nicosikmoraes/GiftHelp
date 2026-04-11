@@ -5,6 +5,7 @@ import TextComponent from "@/components/ui/Text";
 import TitleComponent from "@/components/ui/Title";
 import { api } from "@/services/api";
 import { saveToken } from "@/storage/auth";
+import { showToast } from "@/utils/toast";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -44,6 +45,7 @@ export default function Register() {
       await signIn(email, password);
 
       router.replace("/(auth)/home");
+      showToast("Account created with success", "success");
     } catch (error) {
       console.log("Erro no cadastro", error);
       setErrors((prev) => ({ ...prev, email: "Email already used" }));

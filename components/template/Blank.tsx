@@ -1,6 +1,5 @@
 import React from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
-import Toast from "../ui/Toast/Toast";
 import FooterDefault from "./FooterDefault";
 import Header from "./Header";
 type Props = {
@@ -13,7 +12,6 @@ export default function BlankTemplate({ children }: Props) {
       <View style={styles.header}>
         <Header />
       </View>
-      <Toast />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

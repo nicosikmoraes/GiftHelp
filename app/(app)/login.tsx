@@ -5,6 +5,7 @@ import PressableComponent from "@/components/ui/Pressable";
 import TextComponent from "@/components/ui/Text";
 import TitleComponent from "@/components/ui/Title";
 import { useAuth } from "@/hooks/useAuth";
+import { showToast } from "@/utils/toast";
 import { Link, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -55,6 +56,7 @@ export default function Login() {
       setLoading(true);
       await signIn(email, password);
       router.replace("/(auth)/home");
+      showToast("Loged with success", "success");
     } catch (err: any) {
       setErrors({
         email: "Email or password is incorrect",

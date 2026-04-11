@@ -2,6 +2,7 @@ import SelectModal from "@/components/ui/ModalSelect";
 import PressableComponent from "@/components/ui/Pressable";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUser } from "@/services/user";
+import { showToast } from "@/utils/toast";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import InputNumberComponent from "../ui/InputNumerico";
@@ -40,6 +41,8 @@ export default function PersonalInformations() {
       const updatedUser = await updateUser(payload);
 
       setUser(updatedUser);
+
+      showToast("Saved with success", "success");
     } catch (error: any) {
       const message =
         error?.response?.data?.message || "Erro ao atualizar usuário";

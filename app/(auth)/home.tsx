@@ -1,4 +1,5 @@
 import PersonalInformations from "@/components/home/PersonalInformations";
+import Wishlist from "@/components/home/Wishlist";
 import BlankTemplate from "@/components/template/Blank";
 import TitleComponent from "@/components/ui/Title";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +33,8 @@ export default function Home() {
         </View>
 
         <PersonalInformations />
+
+        <Wishlist />
       </ScrollView>
     </BlankTemplate>
   );

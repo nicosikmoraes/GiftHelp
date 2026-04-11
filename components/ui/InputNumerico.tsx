@@ -13,6 +13,7 @@ type Props = TextInputProps & {
   label?: string;
   marginBottom?: number;
   amount?: number;
+  currency?: boolean; // 🔥 NOVO
 };
 
 export default function InputNumberComponent({
@@ -25,22 +26,39 @@ export default function InputNumberComponent({
   marginBottom = 0,
   label = "",
   amount = 2,
+  currency = false,
   onChangeText,
   value,
   ...props
 }: Props) {
   const [focused, setFocused] = useState(false);
 
+  function formatCurrency(value: string) {
+    const number = Number(value) / 100;
+
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
   function handleChange(text: string) {
     let onlyNumbers = text.replace(/[^0-9]/g, "");
 
-    if (onlyNumbers.length > amount) {
-      onlyNumbers = onlyNumbers.slice(0, amount);
+    if (!currency) {
+      if (onlyNumbers.length > amount) {
+        onlyNumbers = onlyNumbers.slice(0, amount);
+      }
+
+      onlyNumbers = onlyNumbers.replace(/^0+(\d)/, "$1");
+
+      onChangeText?.(onlyNumbers);
+      return;
     }
 
-    onlyNumbers = onlyNumbers.replace(/^0+(\d)/, "$1");
+    const formatted = formatCurrency(onlyNumbers);
 
-    onChangeText?.(onlyNumbers);
+    onChangeText?.(formatted);
   }
 
   return (

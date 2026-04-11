@@ -1,5 +1,6 @@
 import { Redirect, Stack } from "expo-router";
 import { useContext } from "react";
+import FlashMessage from "react-native-flash-message";
 import { AuthContext, AuthProvider } from "../../context/AuthContext";
 import "../../global.css";
 
@@ -25,6 +26,7 @@ export default function AppLayout() {
           },
         }}
       />
+      <FlashMessage />
     </AuthProvider>
   );
 }
