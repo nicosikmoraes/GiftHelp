@@ -12,6 +12,7 @@ type Props = {
   marginTop?: number;
   message: string;
   loading?: boolean;
+  color?: string;
   onPress: () => void;
 };
 
@@ -23,6 +24,8 @@ export default function PressableComponent({
   height = 45,
   loading = false,
   message,
+  color = "#1A1A1A",
+  padding = 10,
   onPress,
 }: Props) {
   return (
@@ -36,6 +39,7 @@ export default function PressableComponent({
         { width: width },
         { height: height },
         { marginTop: marginTop },
+        { padding: padding },
       ]}
     >
       {loading ? (
@@ -45,7 +49,7 @@ export default function PressableComponent({
           message={message}
           fontWeight={900}
           fontSize={16}
-          color="#1A1A1A"
+          color={color}
         />
       )}
     </Pressable>
@@ -56,6 +60,5 @@ const styles = StyleSheet.create({
   btn: {
     display: "flex",
     justifyContent: "center",
-    padding: 10,
   },
 });

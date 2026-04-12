@@ -10,7 +10,7 @@ type Props = {
   color?: string;
   fontSize?: number;
   fontWeight?: any;
-  message: string;
+  message: string | undefined;
   opacity?: number;
   textAlign?: any;
   onPress?: () => void;

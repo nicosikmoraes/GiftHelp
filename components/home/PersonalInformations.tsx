@@ -1,6 +1,7 @@
 import SelectModal from "@/components/ui/ModalSelect";
 import PressableComponent from "@/components/ui/Pressable";
 import { useAuth } from "@/hooks/useAuth";
+import { getColors } from "@/services/color";
 import { updateUser } from "@/services/user";
 import { showToast } from "@/utils/toast";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export default function PersonalInformations() {
   const [PantsSize, setPantsSize] = useState("");
   const [ShoeSize, setShoeSize] = useState("");
   const [RingSize, setRingSize] = useState("");
+  const [colors, setColors] = useState([]);
   const [preferredColor, setPreferredColor] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +28,15 @@ export default function PersonalInformations() {
       setPreferredColor(user.preferred_color || "");
     }
   }, [user]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await getColors();
+      setColors(data);
+    }
+
+    load();
+  }, []);
 
   async function handlePersonalInformations() {
     try {
@@ -108,35 +119,7 @@ export default function PersonalInformations() {
         <SelectModal
           value={preferredColor}
           onChange={setPreferredColor}
-          options={[
-            { label: "White", value: "white" },
-            { label: "Black", value: "black" },
-            { label: "Gray", value: "gray" },
-            { label: "Silver", value: "silver" },
-
-            { label: "Red", value: "red" },
-            { label: "Dark Red", value: "dark_red" },
-            { label: "Pink", value: "pink" },
-
-            { label: "Blue", value: "blue" },
-            { label: "Light Blue", value: "light_blue" },
-            { label: "Navy", value: "navy" },
-
-            { label: "Green", value: "green" },
-            { label: "Dark Green", value: "dark_green" },
-            { label: "Lime", value: "lime" },
-
-            { label: "Yellow", value: "yellow" },
-            { label: "Gold", value: "gold" },
-
-            { label: "Orange", value: "orange" },
-
-            { label: "Purple", value: "purple" },
-            { label: "Violet", value: "violet" },
-
-            { label: "Brown", value: "brown" },
-            { label: "Beige", value: "beige" },
-          ]}
+          options={colors}
           width="66%"
           label="Prefered Color"
           placeholder="Select"

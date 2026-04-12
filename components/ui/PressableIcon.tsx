@@ -7,7 +7,7 @@ type Props = {
   backgroundColor?: string;
   borderRadius?: number;
   marginTop?: number;
-  onPress: () => void;
+  onPress?: () => void;
 };
 
 export default function IconButton({
