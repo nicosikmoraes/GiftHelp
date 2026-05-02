@@ -1,5 +1,5 @@
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import FooterDefault from "./FooterDefault";
 import Header from "./Header";
 type Props = {
@@ -12,13 +12,8 @@ export default function BlankTemplate({ children }: Props) {
       <View style={styles.header}>
         <Header />
       </View>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={20} // 🔥 importante
-      >
-        <View style={{ flex: 1 }}>{children}</View>
-      </KeyboardAvoidingView>
+
+      <View style={{ flex: 1 }}>{children}</View>
 
       <FooterDefault />
     </View>

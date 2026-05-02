@@ -12,6 +12,7 @@ type Props = TextInputProps & {
   error?: string;
   label?: string;
   marginBottom?: number;
+  backgroundColor?: string;
 };
 
 export default function InputComponent({
@@ -23,6 +24,7 @@ export default function InputComponent({
   error,
   marginBottom = 0,
   label = "",
+  backgroundColor = "#1A1A1A",
   ...props
 }: Props) {
   const [focused, setFocused] = useState(false);
@@ -43,6 +45,7 @@ export default function InputComponent({
           { width: "100%" },
           { height: height },
           { borderRadius: borderRadius },
+          { backgroundColor: backgroundColor },
         ]}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
@@ -61,7 +64,6 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     padding: 10,
-    backgroundColor: "#1A1A1A",
     color: "#B3B3B3",
     zIndex: 2,
   },

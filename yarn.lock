@@ -1168,6 +1168,11 @@
     chalk "^4.1.0"
     js-yaml "^4.1.0"
 
+"@google/generative-ai@^0.24.1":
+  version "0.24.1"
+  resolved "https://registry.npmjs.org/@google/generative-ai/-/generative-ai-0.24.1.tgz"
+  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
+
 "@isaacs/ttlcache@^1.4.1":
   version "1.4.1"
   resolved "https://registry.npmjs.org/@isaacs/ttlcache/-/ttlcache-1.4.1.tgz"
@@ -2709,6 +2714,11 @@ expo-keep-awake@~55.0.4:
   resolved "https://registry.npmjs.org/expo-keep-awake/-/expo-keep-awake-55.0.4.tgz"
   integrity sha512-vwfdMtMS5Fxaon8gC0AiE70SpxTsHJ+rjeoVJl8kdfdbxczF7OIaVmfjFJ5Gfigd/WZiLqxhfZk34VAkXF4PNg==
 
+expo-linear-gradient@~55.0.13:
+  version "55.0.13"
+  resolved "https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-55.0.13.tgz"
+  integrity sha512-Qz2T4jpkA15RIk29DBqI1TwW+8O9AN8MyC4TJPbh/5UnihH0yNNz3waplUO8Szh5OZ3czTGvtPQU4ysF3RDxwQ==
+
 expo-linking@^55.0.7, expo-linking@~55.0.12, expo-linking@~55.0.7:
   version "55.0.12"
   resolved "https://registry.npmjs.org/expo-linking/-/expo-linking-55.0.12.tgz"
@@ -2733,6 +2743,14 @@ expo-modules-core@55.0.15:
   integrity sha512-MAGz1SYSVgQbwVeUysWgPtLh8ozbBwORatXoA4w0NZqZBZzEyBgUQNhuwaroaIi9W8Ir3wy1McmZcDYDJNGmVw==
   dependencies:
     invariant "^2.2.4"
+
+expo-navigation-bar@~55.0.12:
+  version "55.0.12"
+  resolved "https://registry.npmjs.org/expo-navigation-bar/-/expo-navigation-bar-55.0.12.tgz"
+  integrity sha512-G7olnyAqGd7I3hLFAgP4WdcZFMD9pV6UY79P7EHyRdMuRZrYJfDdwcelyYB2+tekOdQEktZ3WlLVK+uS7f7TYw==
+  dependencies:
+    debug "^4.3.2"
+    react-native-is-edge-to-edge "^1.2.1"
 
 expo-router@*, expo-router@~55.0.5:
   version "55.0.5"

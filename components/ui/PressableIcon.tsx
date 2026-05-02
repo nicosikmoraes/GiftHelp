@@ -13,7 +13,7 @@ type Props = {
 export default function IconButton({
   icon,
   size = 45,
-  backgroundColor = "#E65C00",
+  backgroundColor = "transparent",
   borderRadius = 12,
   marginTop = 0,
   onPress,
@@ -26,8 +26,9 @@ export default function IconButton({
         {
           width: size,
           height: size,
-          borderRadius,
-          marginTop,
+          borderRadius: borderRadius,
+          marginTop: marginTop,
+          backgroundColor: backgroundColor,
         },
       ]}
     >
