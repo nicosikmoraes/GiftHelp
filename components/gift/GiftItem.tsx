@@ -1,54 +1,19 @@
-import { getGiftStyle } from "@/utils/giftStyle";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
-import IconButton from "../ui/PressableIcon";
-import TextComponent from "../ui/Text";
+import { colors, radius } from "@/theme/vitrine";
+import type { Gift } from "@/services/gift";
+import { Pressable, StyleSheet, Text } from "react-native";
+import GiftArt from "./GiftArt";
 
-type Props = {
-  gift: {
-    id: number;
-    name: string;
-    price?: number;
-    type: string;
-  };
-  onPress?: () => void;
-};
-
-export default function GiftItem({ gift, onPress }: Props) {
-  const { icon, color } = getGiftStyle(gift.type);
-
+export default function GiftItem({ gift, onPress }: { gift: Gift; onPress: () => void }) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
-      <View style={[styles.icon_container, { backgroundColor: color }]}>
-        <IconButton
-          icon={<Ionicons name={icon} size={45} color="#1A1A1A" />}
-          size={45}
-        />
-      </View>
-
-      <TextComponent message={gift.name} fontSize={16} fontWeight="heavy" />
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
+      <GiftArt type={gift.type} />
+      <Text style={styles.name} numberOfLines={2}>{gift.name}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 7,
-    backgroundColor: "#1A1A1A",
-    borderRadius: 4,
-    marginBottom: 10,
-    height: 80,
-    display: "flex",
-    flexDirection: "row",
-    gap: 20,
-    alignItems: "center",
-  },
-  icon_container: {
-    height: 65,
-    width: 65,
-    borderRadius: 4,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  tile: { flex: 1, minWidth: 0, minHeight: 82, padding: 4, gap: 4, borderWidth: 1, borderColor: colors.line, borderRadius: radius.control, backgroundColor: colors.surface },
+  name: { color: colors.ink, fontSize: 13, fontWeight: "700", paddingHorizontal: 4, paddingBottom: 3 },
+  pressed: { backgroundColor: colors.tint, transform: [{ scale: 0.98 }] },
 });

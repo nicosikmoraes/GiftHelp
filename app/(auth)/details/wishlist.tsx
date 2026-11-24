@@ -1,227 +1,110 @@
 import BlankTemplate from "@/components/template/Blank";
-import InputComponent from "@/components/ui/Input";
-import InputNumberComponent from "@/components/ui/InputNumerico";
+import Input from "@/components/ui/Input";
+import NumberInput from "@/components/ui/InputNumerico";
 import SelectModal from "@/components/ui/ModalSelect";
-import PressableComponent from "@/components/ui/Pressable";
-import TextAreaComponent from "@/components/ui/TextArea";
-import TitleComponent from "@/components/ui/Title";
+import Button from "@/components/ui/Pressable";
+import TextArea from "@/components/ui/TextArea";
+import Title from "@/components/ui/Title";
 import { getColors } from "@/services/color";
-import { createGift, getGiftTypes } from "@/services/gift";
+import { createGift, getGiftTypes, type CreateGiftPayload } from "@/services/gift";
+import { colors, radius, space } from "@/theme/vitrine";
+import type { SelectionOption } from "@/types/selection";
 import { showToast } from "@/utils/toast";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function WishlistDetails() {
-  const [types, setTypes] = useState<any[]>([]);
-  const [type, setType] = useState("");
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [colors, setColors] = useState([]);
-  const [color, setColor] = useState("");
-  const [description, setDescription] = useState("");
+  const [types, setTypes] = useState<SelectionOption[]>([]);
+  const [colorOptions, setColorOptions] = useState<SelectionOption[]>([]);
+  const [attempt, setAttempt] = useState(0);
+  const [catalog, setCatalog] = useState({ typesFailed: false, colorsFailed: false });
+  const [form, setForm] = useState({ name: "", type: "", color: "", price: "", quantity: "", description: "" });
+  const [errors, setErrors] = useState<{ name?: string; type?: string; quantity?: string }>({});
   const [loading, setLoading] = useState(false);
 
-  const [errors, setErrors] = useState<{
-    name?: string;
-    type?: string;
-    price?: string;
-    quantity?: string;
-  }>({});
-
   useEffect(() => {
-    async function loadTypes() {
-      const data = await getGiftTypes();
-      setTypes(data);
-    }
+    const controller = new AbortController();
+    setCatalog({ typesFailed: false, colorsFailed: false });
+    getGiftTypes(controller.signal).then((data) => {
+      if (!controller.signal.aborted) setTypes(data);
+    }).catch(() => {
+      if (!controller.signal.aborted) setCatalog((state) => ({ ...state, typesFailed: true }));
+    });
+    getColors(controller.signal).then((data) => {
+      if (!controller.signal.aborted) setColorOptions(data);
+    }).catch(() => {
+      if (!controller.signal.aborted) setCatalog((state) => ({ ...state, colorsFailed: true }));
+    });
+    return () => controller.abort();
+  }, [attempt]);
 
-    loadTypes();
-  }, []);
-
-  useEffect(() => {
-    async function load() {
-      const data = await getColors();
-      setColors(data);
-    }
-
-    load();
-  }, []);
-
-  function validateInputs() {
-    const newErrors: typeof errors = {};
-
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!type) {
-      newErrors.type = "Type is required";
-    }
-
-    if (price) {
-      const raw = price.replace(/[^\d]/g, "");
-      if (isNaN(Number(raw))) {
-        newErrors.price = "Invalid price";
-      }
-    }
-
-    if (quantity) {
-      if (Number(quantity) <= 0) {
-        newErrors.quantity = "Invalid quantity";
-      }
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+  function change(field: keyof typeof form, value: string) {
+    setForm((last) => ({ ...last, [field]: value }));
+    setErrors((last) => ({ ...last, [field]: undefined }));
   }
 
-  async function hanldeWishlist() {
-    if (!validateInputs()) return;
+  async function submit() {
+    if (loading) return;
+    const name = form.name.trim();
+    const quantity = form.quantity ? Number(form.quantity) : undefined;
+    const nextErrors: typeof errors = {};
+    if (!name) nextErrors.name = "Informe o nome do presente.";
+    if (!form.type) nextErrors.type = "Selecione o tipo de presente.";
+    if (quantity !== undefined && (!Number.isInteger(quantity) || quantity < 1)) nextErrors.quantity = "Informe uma quantidade maior que zero.";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
 
+    const payload: CreateGiftPayload = {
+      name,
+      type: form.type,
+      color: form.color || undefined,
+      price: form.price ? Number(form.price.replace(/\D/g, "")) / 100 : undefined,
+      quantity,
+      description: form.description.trim() || undefined,
+    };
     try {
       setLoading(true);
-
-      const payload: any = {
-        name,
-        type,
-      };
-
-      if (price) {
-        payload.price = Number(price.replace(/[^\d]/g, "")) / 100;
-      }
-
-      if (quantity) {
-        payload.quantity = Number(quantity);
-      }
-
-      if (description) payload.description = description;
-      if (color) payload.color = color;
-
       await createGift(payload);
-
       router.replace("/(auth)/home");
-      showToast("Gift created successfully", "success");
-
-      setErrors({});
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "Error creating gift";
-
-      showToast(message, "danger");
+      showToast("Presente adicionado à lista", "success");
+    } catch {
+      showToast("Não foi possível adicionar o presente", "danger");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <BlankTemplate>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <>
-          <View style={styles.container}>
-            <View style={{ marginBottom: 10 }}>
-              <TitleComponent message="Add a new suggestion" fontSize={20} />
-            </View>
-
-            <InputComponent
-              label="Title"
-              placeholder="Title"
-              value={name}
-              borderError={errors.name ? "red" : "transparent"}
-              onChangeText={(text) => {
-                setName(text);
-                setErrors((prev) => ({ ...prev, name: undefined }));
-              }}
-              error={errors.name}
-            />
-
-            <View style={styles.price_quantity_container}>
-              <SelectModal
-                value={type}
-                onChange={(value) => {
-                  setType(value);
-                  setErrors((prev) => ({ ...prev, type: undefined }));
-                }}
-                options={types}
-                label="Type"
-                placeholder="Select type"
-                width="49%"
-                error={errors.type}
-              />
-
-              <SelectModal
-                value={color}
-                onChange={setColor}
-                width="49%"
-                options={colors}
-                label="Color"
-                placeholder="Select"
-              />
-            </View>
-
-            <View style={styles.price_quantity_container}>
-              <InputNumberComponent
-                label="Estimate price"
-                placeholder="$"
-                value={price}
-                borderError={errors.price ? "red" : "transparent"}
-                onChangeText={(text) => {
-                  setPrice(text);
-                  setErrors(() => ({ price: undefined }));
-                }}
-                error={errors.price}
-                amount={20}
-                currency={true}
-                width="49%"
-              />
-              <InputNumberComponent
-                label="Quantity"
-                placeholder="Value"
-                value={quantity}
-                borderError={errors.quantity ? "red" : "transparent"}
-                onChangeText={(text) => {
-                  setQuantity(text);
-                  setErrors((prev) => ({ ...prev, quantity: undefined }));
-                }}
-                error={errors.quantity}
-                amount={3}
-                width="49%"
-              />
-            </View>
-
-            <TextAreaComponent
-              label="Description"
-              placeholder="Write a description about this gift..."
-              value={description}
-              onChangeText={setDescription}
-            />
-
-            <PressableComponent
-              message="Create suggestion"
-              onPress={hanldeWishlist}
-              marginTop={10}
-              loading={loading}
-            />
+    <BlankTemplate back>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+        <View style={styles.form}>
+          <Title message="Novo presente" fontSize={30} />
+          <Input label="Nome" placeholder="Ex.: Caderno de capa dura" value={form.name} onChangeText={(value) => change("name", value)} error={errors.name} />
+          <View style={styles.row}>
+            <View style={styles.field}><SelectModal value={form.type} options={types} label="Tipo" error={errors.type} onChange={(value) => change("type", value)} /></View>
+            <View style={styles.field}><SelectModal value={form.color} options={colorOptions} label="Cor" onChange={(value) => change("color", value)} /></View>
           </View>
-        </>
+          {(catalog.typesFailed || catalog.colorsFailed) && <Pressable accessibilityRole="button" onPress={() => setAttempt((last) => last + 1)} style={styles.retry}>
+            <Text style={styles.retryLabel}>Tentar carregar as opções</Text>
+          </Pressable>}
+          <View style={styles.row}>
+            <View style={styles.field}><NumberInput label="Preço estimado" value={form.price} amount={12} currency placeholder="R$ 0,00" onChangeText={(value) => change("price", value)} /></View>
+            <View style={styles.field}><NumberInput label="Quantidade" value={form.quantity} amount={3} placeholder="1" error={errors.quantity} onChangeText={(value) => change("quantity", value)} /></View>
+          </View>
+          <TextArea label="Descrição" value={form.description} placeholder="Detalhes para ajudar na escolha" onChangeText={(value) => change("description", value)} />
+          <Button message="Adicionar à lista" loading={loading} onPress={submit} />
+        </View>
       </ScrollView>
     </BlankTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    display: "flex",
-    alignItems: "center",
-    gap: 20,
-    padding: 20,
-  },
-  price_quantity_container: {
-    display: "flex",
-    flexDirection: "row",
-    gap: "2%",
-  },
+  content: { padding: space.page },
+  form: { padding: space.panel, gap: space.gap, borderRadius: radius.card, backgroundColor: colors.paper },
+  row: { flexDirection: "row", gap: space.compact },
+  field: { flex: 1, minWidth: 0 },
+  retry: { minHeight: 44, justifyContent: "center" },
+  retryLabel: { color: colors.action, fontWeight: "700" },
 });

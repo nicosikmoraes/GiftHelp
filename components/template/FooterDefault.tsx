@@ -1,50 +1,35 @@
-// components/ui/Header.tsx
+import { colors, layout, space } from "@/theme/vitrine";
 import { Ionicons } from "@expo/vector-icons";
 import { router, usePathname } from "expo-router";
-import { StyleSheet, View } from "react-native";
-import IconButton from "../ui/PressableIcon";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
+const tabs = [
+  { label: "Perfil", icon: "person-outline", href: "/(auth)/home", path: "/home" },
+  { label: "Eventos", icon: "calendar-outline", href: "/(auth)/events", path: "/events" },
+] as const;
 
 export default function FooterDefault() {
   const pathname = usePathname();
-
-  const isHome = pathname.startsWith("/home");
-  const isEvents = pathname.startsWith("/events");
-
   return (
-    <View style={styles.container}>
-      <IconButton
-        icon={
-          <Ionicons
-            name="home"
-            size={30}
-            color={isHome ? "#E65C00" : "#4C4C4C"}
-          />
-        }
-        onPress={() => router.replace("/(auth)/home")}
-        size={30}
-      />
-      <IconButton
-        icon={
-          <Ionicons
-            name="wine"
-            size={30}
-            color={isEvents ? "#E65C00" : "#4C4C4C"}
-          />
-        }
-        onPress={() => router.replace("/(auth)/events")}
-        size={30}
-      />
+    <View style={styles.footer}>
+      {tabs.map(({ label, icon, href, path }) => {
+        const selected = pathname === path || (path === "/home" && pathname.startsWith("/details/"));
+        return (
+          <Pressable key={label} accessibilityRole="tab" accessibilityState={{ selected }}
+            onPress={() => { if (pathname !== path) router.replace(href); }}
+            style={({ pressed }) => [styles.tab, (selected || pressed) && styles.selected]}>
+            <Ionicons name={icon} size={17} color={colors.onShell} />
+            <Text style={styles.label}>{label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-    height: 100,
-    backgroundColor: "#1A1A1A",
-    justifyContent: "space-around",
-    display: "flex",
-    flexDirection: "row",
-  },
+  footer: { flexDirection: "row", justifyContent: "center", borderTopWidth: 1, borderTopColor: colors.shellLine, padding: 6, gap: space.compact },
+  tab: { flex: 1, maxWidth: 145, minHeight: layout.controlHeight, borderRadius: 11, gap: 6, alignItems: "center", justifyContent: "center", flexDirection: "row" },
+  selected: { backgroundColor: colors.shellLine },
+  label: { color: colors.onShell, fontWeight: "700", fontSize: 13 },
 });

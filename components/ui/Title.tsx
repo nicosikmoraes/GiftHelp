@@ -1,30 +1,13 @@
-import {
-  JuliusSansOne_400Regular,
-  useFonts,
-} from "@expo-google-fonts/julius-sans-one";
-import React from "react";
-import { StyleSheet, Text } from "react-native";
+import { colors, serif } from "@/theme/vitrine";
+import { StyleSheet, Text, type TextStyle } from "react-native";
 
-type Props = {
-  fontSize?: number;
-  message: string;
-};
+type Props = { fontSize?: number; message: string; color?: string; variant?: "serif" | "sans"; align?: TextStyle["textAlign"] };
 
-export default function TitleComponent({ fontSize = 20, message }: Props) {
-  const [fontsLoaded] = useFonts({
-    JuliusSansOne_400Regular,
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  return <Text style={[styles.title, { fontSize: fontSize }]}>{message}</Text>;
+export default function TitleComponent({ fontSize = 24, message, color = colors.ink, variant = "serif", align }: Props) {
+  return <Text accessibilityRole="header" style={[styles[variant], { fontSize, color }, align && { textAlign: align }]}>{message}</Text>;
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontFamily: "JuliusSansOne_400Regular",
-    color: "#F8FAFC",
-  },
+  serif: { fontFamily: serif, letterSpacing: -0.5 },
+  sans: { fontWeight: "800", letterSpacing: -1.15, textAlign: "center" },
 });

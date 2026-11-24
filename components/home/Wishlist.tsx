@@ -1,132 +1,85 @@
-import { getUserGifts } from "@/services/gift";
-import { showToast } from "@/utils/toast";
+import GiftItem from "@/components/gift/GiftItem";
+import GiftModal from "@/components/gift/GiftModal";
+import { getUserGifts, type Gift } from "@/services/gift";
+import { colors, radius, serif, space } from "@/theme/vitrine";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-import GiftItem from "../gift/GiftItem";
-import GiftModal from "../gift/GiftModal";
-import PressableComponent from "../ui/Pressable";
-import TitleComponent from "../ui/Title";
+import { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
-type Gift = {
-  id: number;
-  name: string;
-  type: string;
-  price?: number;
-  description?: string;
-  color?: string;
-  quantity: number;
-  is_purchased: boolean;
-};
+const pageSize = 5;
 
 export default function Wishlist() {
   const [gifts, setGifts] = useState<Gift[]>([]);
-  const [visibleCount, setVisibleCount] = useState(5);
-  const filteredGifts = gifts.filter((gift) => !gift.is_purchased);
-  const visibleGifts = filteredGifts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredGifts.length;
+  const [visibleCount, setVisibleCount] = useState(pageSize);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [attempt, setAttempt] = useState(0);
+  const purchased = useRef(new Set<number>());
 
-  useFocusEffect(
-    useCallback(() => {
-      loadGifts();
-    }, []),
-  );
+  useFocusEffect(useCallback(() => {
+    const controller = new AbortController();
+    setStatus("loading");
+    getUserGifts(controller.signal).then((data) => {
+      if (controller.signal.aborted) return;
+      setGifts(data.filter((gift) => !gift.is_purchased && !purchased.current.has(gift.id)));
+      setStatus("ready");
+    }).catch(() => {
+      if (!controller.signal.aborted) setStatus("error");
+    });
+    return () => controller.abort();
+  }, [attempt]));
 
-  async function loadGifts() {
-    try {
-      const data = await getUserGifts();
-      setGifts(data);
-    } catch (error) {
-      showToast("Error loading gifts", "danger");
-    }
-  }
+  const tiles: (Gift | "add")[] = gifts.slice(0, visibleCount);
+  tiles.splice(3, 0, "add");
+  const rows = [];
+  for (let index = 0; index < tiles.length; index += 2) rows.push(tiles.slice(index, index + 2));
+  const hasMore = gifts.length > visibleCount;
 
-  function handleLoadMore() {
-    setVisibleCount((prev) => prev + 5);
-  }
-
-  function handleShowLess() {
-    setVisibleCount(5);
-  }
-
-  function handleOpenGift(gift: Gift) {
-    setSelectedGift(gift);
-    setModalVisible(true);
-  }
-
-  function handleCloseModal() {
-    setModalVisible(false);
-    setSelectedGift(null);
-    loadGifts();
+  function markPurchased(id: number) {
+    purchased.current.add(id);
+    setGifts((previous) => previous.filter((gift) => gift.id !== id));
+    setSelectedGift((previous) => previous?.id === id ? null : previous);
   }
 
   return (
-    <View style={styles.wishlist_container}>
-      <>
-        <TitleComponent message="Wishlist" fontSize={20} />
-
-        <View>
-          <FlatList
-            scrollEnabled={false}
-            data={visibleGifts}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <GiftItem gift={item} onPress={() => handleOpenGift(item)} />
-            )}
-          />
-
-          {filteredGifts.length > 5 && (
-            <>
-              {hasMore ? (
-                <PressableComponent
-                  message="see more"
-                  onPress={handleLoadMore}
-                  backgroundColor="transparent"
-                  color="#E65C00"
-                  width={80}
-                  height={20}
-                  padding={0}
-                  marginTop={-5}
-                />
-              ) : (
-                <PressableComponent
-                  message="see less"
-                  onPress={handleShowLess}
-                  backgroundColor="transparent"
-                  color="#E65C00"
-                  width={80}
-                  height={20}
-                  padding={0}
-                  marginTop={-5}
-                />
-              )}
-            </>
-          )}
-        </View>
-
-        <PressableComponent
-          message="Add new gift"
-          onPress={() => router.push("/(auth)/details/wishlist")}
-        />
-      </>
-
-      <GiftModal
-        visible={modalVisible}
-        gift={selectedGift}
-        onClose={handleCloseModal}
-      />
+    <View style={styles.card}>
+      <Text accessibilityRole="header" style={styles.title}>Lista de desejos</Text>
+      {status === "loading" && gifts.length === 0 && <ActivityIndicator color={colors.action} accessibilityLabel="Carregando a lista" />}
+      {status === "error" && <Pressable accessibilityRole="button" onPress={() => setAttempt((last) => last + 1)} style={styles.link}>
+        <Text style={styles.linkText}>Tentar carregar a lista</Text>
+      </Pressable>}
+      {status === "ready" && gifts.length === 0 && <Text style={styles.empty}>Sua lista está vazia.</Text>}
+      {rows.map((row, index) => <View key={index} style={styles.row}>
+        {row.map((tile) => tile === "add"
+          ? <Pressable key="add" accessibilityRole="button" onPress={() => router.push("/(auth)/details/wishlist")}
+              style={({ pressed }) => [styles.add, pressed && styles.addPressed]}>
+              <View style={styles.plus}><Ionicons name="add" size={18} color={colors.action} /></View>
+              <Text style={styles.addText}>Novo presente</Text>
+            </Pressable>
+          : <GiftItem key={tile.id} gift={tile} onPress={() => setSelectedGift(tile)} />)}
+        {row.length === 1 && row[0] !== "add" && <View style={styles.spacer} />}
+      </View>)}
+      {gifts.length > pageSize && <Pressable accessibilityRole="button" style={styles.link}
+        onPress={() => setVisibleCount((last) => hasMore ? last + pageSize : pageSize)}>
+        <Text style={styles.linkText}>{hasMore ? "Ver mais" : "Ver menos"}</Text>
+      </Pressable>}
+      {selectedGift && <GiftModal key={selectedGift.id} gift={selectedGift} onClose={() => setSelectedGift(null)} onPurchased={markPurchased} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wishlist_container: {
-    marginTop: 40,
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
-  },
+  card: { backgroundColor: colors.paper, borderColor: colors.line, borderWidth: 1, borderRadius: radius.card, padding: 11, gap: 7 },
+  title: { fontFamily: serif, color: colors.ink, fontSize: 26, marginBottom: 2 },
+  row: { flexDirection: "row", gap: 7 },
+  spacer: { flex: 1 },
+  empty: { color: colors.muted },
+  add: { flex: 1, minHeight: 82, minWidth: 0, alignItems: "center", justifyContent: "center", gap: 4, padding: 5, borderRadius: radius.control, borderWidth: 1, borderStyle: "dashed", borderColor: "#ba8268", backgroundColor: colors.tint },
+  addPressed: { backgroundColor: "#efd3bd", transform: [{ scale: 0.98 }] },
+  plus: { width: 27, height: 27, borderRadius: 14, backgroundColor: "#efd0bc", alignItems: "center", justifyContent: "center" },
+  addText: { color: colors.action, fontWeight: "800", textAlign: "center", fontSize: 13 },
+  link: { minHeight: 44, justifyContent: "center", alignItems: "center" },
+  linkText: { color: colors.action, fontWeight: "800" },
 });

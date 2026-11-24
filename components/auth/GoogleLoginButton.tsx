@@ -1,112 +1,66 @@
 import { useAuth } from "@/hooks/useAuth";
-import {
-  Roboto_400Regular,
-  Roboto_700Bold,
-  useFonts,
-} from "@expo-google-fonts/roboto";
+import { radius } from "@/theme/vitrine";
+import { showToast } from "@/utils/toast";
 import * as Google from "expo-auth-session/providers/google";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
+const googleG = require("../../assets/images/google-g.png");
+
 export default function GoogleLoginButton() {
   const { signInWithGoogle } = useAuth();
-
+  const [busy, setBusy] = useState(false);
+  const handledToken = useRef<string | null>(null);
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "62393066471-k7u83h6vk2sq1t7el0skc9j36pofom2c.apps.googleusercontent.com",
+    clientId: "62393066471-k7u83h6vk2sq1t7el0skc9j36pofom2c.apps.googleusercontent.com",
   });
 
   useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken;
+    if (response?.type !== "success") return;
+    const token = response.authentication?.accessToken;
+    if (!token || handledToken.current === token) return;
 
-      if (token) {
-        handleGoogleLogin(token);
-      }
-    }
-  }, [response]);
+    handledToken.current = token;
+    setBusy(true);
+    signInWithGoogle(token)
+      .then(() => router.replace("/(auth)/home"))
+      .catch(() => showToast("Não foi possível continuar com Google.", "danger"))
+      .finally(() => setBusy(false));
+  }, [response, signInWithGoogle]);
 
-  async function handleGoogleLogin(token: string) {
+  async function openGoogle() {
     try {
-      await signInWithGoogle(token);
-
-      router.replace("/(auth)/home");
-    } catch (error) {
-      console.log("Erro login Google", error);
+      const result = await promptAsync();
+      if (result.type === "error") showToast("Não foi possível continuar com Google.", "danger");
+    } catch {
+      showToast("Não foi possível abrir o login do Google.", "danger");
     }
   }
 
-  const [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-  });
-
-  if (!fontsLoaded) return null;
+  const disabled = !request || busy;
 
   return (
-    <View style={{ marginBottom: 0 }}>
-      <Pressable
-        onPress={() => promptAsync()}
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-      >
-        <View style={styles.content}>
-          {/* 🔥 Ícone do Google */}
-          <Image
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-            }}
-            style={styles.icon}
-          />
-
-          <Text style={styles.text}>{"Login with Google"}</Text>
-          <View style={styles.icon}></View>
-        </View>
-      </Pressable>
-    </View>
+    <Pressable accessibilityRole="button" accessibilityLabel="Continuar com Google"
+      accessibilityState={{ disabled, busy }} disabled={disabled} onPress={openGoogle}
+      style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+      <Image source={googleG} resizeMode="contain" style={styles.icon} accessible={false} />
+      <Text style={styles.text}>Continuar com Google</Text>
+      {busy && <ActivityIndicator size="small" color="#1F1F1F" />}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    opacity: 0.9,
+    minHeight: 44, flexDirection: "row", justifyContent: "center", alignItems: "center",
+    paddingVertical: 6, paddingHorizontal: 12, gap: 10, backgroundColor: "#FFFFFF",
+    borderRadius: radius.control, borderWidth: 1, borderColor: "#747775",
   },
-
-  pressed: {
-    opacity: 0.7,
-  },
-
-  disabled: {
-    opacity: 0.5,
-  },
-
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    width: "100%",
-  },
-
-  icon: {
-    width: 20,
-    height: 20,
-  },
-
-  text: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "500",
-    fontFamily: "Roboto_400Regular",
-  },
+  pressed: { backgroundColor: "#F2F2F2" },
+  icon: { width: 18, height: 18 },
+  text: { fontSize: 14, color: "#1F1F1F", fontWeight: "600", flexShrink: 1, textAlign: "center" },
 });

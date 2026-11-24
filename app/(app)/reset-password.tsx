@@ -31,7 +31,7 @@ export default function Login() {
       setLoading(true);
 
       if (password != confirmPassword) {
-        setError("Diferent passwords");
+        setError("As senhas precisam ser iguais.");
         return;
       }
 
@@ -49,8 +49,7 @@ export default function Login() {
 
       alert(response.data.message);
     } catch (err: any) {
-      alert("Error to redefine password");
-      console.log(err.response?.data);
+      setError("Não foi possível redefinir a senha.");
     } finally {
       setLoading(false);
     }
@@ -58,12 +57,13 @@ export default function Login() {
 
   return (
     <CenteredTemplate>
-      <TitleComponent message="Type your new password" fontSize={28} />
+      <TitleComponent message="Redefinir senha" fontSize={29} />
 
       <View style={styles.input_container}>
         <View>
           <Input
-            placeholder="Passoword"
+            label="Nova senha"
+            placeholder="Digite a nova senha"
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -76,7 +76,8 @@ export default function Login() {
 
         <View>
           <Input
-            placeholder="Confirm Password"
+            label="Confirmar senha"
+            placeholder="Repita a nova senha"
             value={confirmPassword}
             borderError={error ? "red" : "transparent"}
             onChangeText={(text) => {
@@ -91,7 +92,8 @@ export default function Login() {
         </View>
 
         <PressableComponent
-          message={loading ? "Loading" : "Confirm new Password"}
+          message="Redefinir senha"
+          loading={loading}
           marginTop={10}
           onPress={handleReset}
         />
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
   input_container: {
     display: "flex",
     gap: 10,
-    width: "90%",
+    width: "100%",
     marginTop: 15,
   },
 });

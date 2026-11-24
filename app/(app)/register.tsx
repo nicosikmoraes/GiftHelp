@@ -1,15 +1,37 @@
-import CenteredTemplate from "@/components/template/Default";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PostcardTemplate from "@/components/auth/PostcardTemplate";
+import ErrorComponent from "@/components/ui/Error";
 import Input from "@/components/ui/Input";
 import PressableComponent from "@/components/ui/Pressable";
-import TextComponent from "@/components/ui/Text";
-import TitleComponent from "@/components/ui/Title";
-import { api } from "@/services/api";
-import { saveToken } from "@/storage/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { showToast } from "@/utils/toast";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
+import { isAxiosError } from "axios";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
+
+type FormErrors = Partial<Record<"name" | "email" | "password" | "form", string>>;
+type ValidationResponse = { errors?: Partial<Record<"name" | "email" | "password", string[]>> };
+
+function registrationErrors(error: unknown): FormErrors {
+  if (!isAxiosError<ValidationResponse>(error)) {
+    return { form: "Não foi possível criar a conta. Tente novamente." };
+  }
+  if (!error.response) {
+    return { form: "O servidor não respondeu. Tente novamente em instantes." };
+  }
+  if (error.response.status === 422) {
+    const fields = error.response.data?.errors;
+    const errors: FormErrors = {};
+    if (fields?.name?.length) errors.name = "Esse nome não está disponível. Experimente outro.";
+    if (fields?.email?.length) errors.email = "Confira o e-mail. Se já tiver uma conta, entre com ele.";
+    if (fields?.password?.length) errors.password = "Confira a senha. Use pelo menos 6 caracteres.";
+    if (Object.keys(errors).length) return errors;
+  }
+  if (error.response.status === 429) {
+    return { form: "Muitas tentativas. Aguarde um pouco antes de tentar novamente." };
+  }
+  return { form: "O servidor não conseguiu concluir o cadastro. Tente novamente." };
+}
 
 export default function Register() {
   const [name, setName] = useState<string>("");
@@ -17,38 +39,27 @@ export default function Register() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const { signIn } = useAuth();
+  const { registerAccount } = useAuth();
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    password?: string;
-  }>({});
+  function clearError(field: "name" | "email" | "password") {
+    setErrors((last) => ({ ...last, [field]: undefined, form: undefined }));
+  }
 
   async function handleRegister() {
+    if (loading || !validateInputs()) return;
     setLoading(true);
-    if (!validateInputs()) {
-      return;
-    }
 
     try {
-      const response = await api.post("/register", {
-        name,
-        email,
+      const result = await registerAccount({
+        name: name.trim().toLowerCase(),
+        email: email.trim().toLowerCase(),
         password,
       });
-
-      const token: string = response.data.token;
-
-      await saveToken(token);
-
-      await signIn(email, password);
-
-      router.replace("/(auth)/home");
-      showToast("Account created with success", "success");
+      router.replace(result === "signed-in" ? "/(auth)/home" : "/login");
+      showToast(result === "signed-in" ? "Conta criada" : "Conta criada. Entre com seu e-mail e senha.", "success");
     } catch (error) {
-      console.log("Erro no cadastro", error);
-      setErrors((prev) => ({ ...prev, email: "Email already used" }));
+      setErrors(registrationErrors(error));
     } finally {
       setLoading(false);
     }
@@ -58,19 +69,19 @@ export default function Register() {
     const newErrors: typeof errors = {};
 
     if (!name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = "Informe seu nome.";
     }
 
     if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = "Informe seu e-mail.";
+    } else if (!/\S+@\S+\.\S+/.test(email.trim())) {
+      newErrors.email = "Confira o e-mail.";
     }
 
     if (!password.trim()) {
-      newErrors.password = "Password is required";
+      newErrors.password = "Informe uma senha.";
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "Use pelo menos 6 caracteres.";
     }
 
     setErrors(newErrors);
@@ -79,97 +90,36 @@ export default function Register() {
   }
 
   return (
-    <CenteredTemplate>
-      <View style={styles.title_container}>
-        <TitleComponent message="REGISTER NOW" fontSize={36} />
-
-        <TextComponent
-          message="Create your account for free"
-          opacity={0.3}
-          color="#FFFFFF"
-          fontSize={15}
-        />
-      </View>
-
-      <View style={styles.input_container}>
-        <Input
-          placeholder="Name"
-          value={name}
-          borderError={errors.name ? "red" : "transparent"}
-          onChangeText={(text) => {
-            (setName(text), setErrors({}));
-          }}
-          keyboardType="default"
-          error={errors.name}
-        />
-
-        <Input
-          placeholder="Email"
-          value={email}
-          borderError={errors.email ? "red" : "transparent"}
-          onChangeText={(text) => {
-            (setEmail(text), setErrors({}));
-          }}
-          keyboardType="email-address"
-          error={errors.email}
-        />
-
-        <Input
-          placeholder="Password"
-          value={password}
-          borderError={errors.password ? "red" : "transparent"}
-          onChangeText={(text) => {
-            (setPassword(text), setErrors({}));
-          }}
-          secureTextEntry
-          autoComplete="new-password"
-          error={errors.password}
-        />
-
-        <PressableComponent
-          message="Register"
-          onPress={handleRegister}
-          loading={loading}
-        />
-      </View>
-
-      <View style={styles.link_container}>
-        <TextComponent
-          message="Already have an account?"
-          fontSize={14}
-          fontWeight={"default"}
-        />
-        <Link href="/login" style={styles.link_login}>
-          Login
-        </Link>
-      </View>
-    </CenteredTemplate>
+    <PostcardTemplate screen="register" title="Crie sua conta.">
+      <Input
+        label="Nome"
+        placeholder="Seu nome"
+        value={name}
+        onChangeText={(text) => { setName(text); clearError("name"); }}
+        autoComplete="name"
+        error={errors.name}
+      />
+      <Input
+        label="E-mail"
+        placeholder="voce@exemplo.com"
+        value={email}
+        onChangeText={(text) => { setEmail(text); clearError("email"); }}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        error={errors.email}
+      />
+      <PasswordInput
+        label="Senha"
+        placeholder="Pelo menos 6 caracteres"
+        value={password}
+        onChangeText={(text) => { setPassword(text); clearError("password"); }}
+        autoComplete="new-password"
+        onSubmitEditing={handleRegister}
+        error={errors.password}
+      />
+      {errors.form && <ErrorComponent message={errors.form} />}
+      <PressableComponent message="Criar conta" onPress={handleRegister} loading={loading} />
+    </PostcardTemplate>
   );
 }
-
-const styles = StyleSheet.create({
-  title_container: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 25,
-  },
-
-  input_container: {
-    display: "flex",
-    gap: 10,
-    width: "90%",
-  },
-
-  link_login: {
-    alignSelf: "center",
-    color: "#E65C00",
-    opacity: 0.9,
-  },
-
-  link_container: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 5,
-  },
-});

@@ -1,4 +1,5 @@
 import { showMessage } from "react-native-flash-message";
+import { colors } from "@/theme/vitrine";
 
 const baseStyle = {
   animated: true,
@@ -7,8 +8,8 @@ const baseStyle = {
   titleStyle: {
     fontSize: 18,
   },
-  backgroundColor: "#1A1A1A",
-  color: "#fff",
+  backgroundColor: colors.shell,
+  color: colors.onShell,
   style: {
     borderLeftWidth: 5,
   },
@@ -17,15 +18,15 @@ const baseStyle = {
 function getBorderColor(type: "success" | "danger" | "warning" | "info") {
   switch (type) {
     case "success":
-      return "#22c55e";
+      return colors.success;
     case "danger":
-      return "#ef4444";
+      return colors.onDanger;
     case "warning":
       return "#f59e0b";
     case "info":
-      return "#E65C00";
+      return colors.accent;
     default:
-      return "#E65C00";
+      return colors.accent;
   }
 }
 

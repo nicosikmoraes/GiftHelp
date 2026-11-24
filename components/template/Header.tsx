@@ -1,39 +1,49 @@
-// components/ui/Header.tsx
+import { colors, layout, serif, space } from "@/theme/vitrine";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function Header() {
-  const canGoBack = router.canGoBack();
+export type HeaderAction = {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+};
 
+export default function Header({ back, action }: { back?: () => void; action?: HeaderAction }) {
+  const controls = [
+    ...(back ? [{ icon: "arrow-back" as const, label: "Voltar", onPress: back }] : []),
+    ...(action ? [action] : []),
+  ];
   return (
-    <>
-      {canGoBack && (
-        <View style={styles.container}>
-          <Pressable onPress={() => router.back()} style={styles.arrow_btn}>
-            <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
+    <View style={styles.header}>
+      <View style={styles.brand}>
+        <View style={styles.mark} accessible={false}><Ionicons name="gift-outline" size={17} color={colors.onAccent} /></View>
+        <Text style={styles.name}>Laço<Text style={styles.period}>.</Text></Text>
+      </View>
+      <View style={styles.actions}>
+        {controls.map(({ icon, label, onPress }) => (
+          <Pressable key={label} accessibilityRole="button" accessibilityLabel={label} onPress={onPress}
+            style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+            <Ionicons name={icon} size={19} color={colors.onShell} />
           </Pressable>
-        </View>
-      )}
-    </>
+        ))}
+      </View>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    height: 40,
-    backgroundColor: "#0F0F0F",
-    justifyContent: "center",
-    marginTop: 30,
-  },
+export function backTo(fallback: "/login" | "/(auth)/home") {
+  if (router.canGoBack()) router.back();
+  else router.replace(fallback);
+}
 
-  arrow_btn: {
-    backgroundColor: "#1A1A1A",
-    width: 40,
-    height: 40,
-    borderRadius: 100,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+const styles = StyleSheet.create({
+  header: { minHeight: 55, width: "100%", paddingHorizontal: space.page, alignSelf: "center", maxWidth: layout.contentWidth, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  brand: { flexDirection: "row", alignItems: "center", gap: 7 },
+  mark: { width: 30, height: 30, borderRadius: 9, backgroundColor: colors.accent, alignItems: "center", justifyContent: "center" },
+  name: { color: colors.onShell, fontFamily: serif, fontSize: 29, letterSpacing: -1 },
+  period: { color: colors.accent },
+  actions: { flexDirection: "row", gap: space.compact },
+  button: { width: layout.controlHeight, height: layout.controlHeight, borderRadius: 22, borderWidth: 1, borderColor: colors.shellLine, alignItems: "center", justifyContent: "center" },
+  pressed: { backgroundColor: colors.shellLine },
 });

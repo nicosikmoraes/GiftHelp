@@ -5,6 +5,7 @@ import PressableComponent from "@/components/ui/Pressable";
 import TextComponent from "@/components/ui/Text";
 import TitleComponent from "@/components/ui/Title";
 import { api } from "@/services/api";
+import { colors } from "@/theme/vitrine";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -15,7 +16,7 @@ export default function ForgotPassword() {
 
   async function handleForgotPassword() {
     if (!email) {
-      setError("Insert a valid email");
+      setError("Informe um e-mail válido.");
       return;
     }
 
@@ -28,7 +29,7 @@ export default function ForgotPassword() {
 
       alert(response.data.message);
     } catch (error: any) {
-      setError("Email not found");
+      setError("Não foi possível enviar o e-mail.");
       setEmail("");
     } finally {
       setLoading(false);
@@ -38,12 +39,11 @@ export default function ForgotPassword() {
   return (
     <CenteredTemplate>
       <View style={styles.title_container}>
-        <TitleComponent message="Reset your password" fontSize={24} />
+        <TitleComponent message="Recuperar senha" fontSize={29} />
 
         <TextComponent
-          message="Insert your email"
-          opacity={0.3}
-          color="#FFFFFF"
+          message="Informe o e-mail da sua conta."
+          color={colors.muted}
           fontSize={15}
         />
       </View>
@@ -51,10 +51,12 @@ export default function ForgotPassword() {
       <View style={styles.input_container}>
         <View>
           <InputComponent
-            placeholder="Email"
+            label="E-mail"
+            placeholder="voce@exemplo.com"
             value={email}
             borderError={error ? "red" : "transparent"}
             keyboardType="email-address"
+            autoCapitalize="none"
             onChangeText={(text) => {
               setEmail(text);
               setError("");
@@ -65,7 +67,8 @@ export default function ForgotPassword() {
 
         <PressableComponent
           marginTop={10}
-          message={loading ? "loading..." : "Send email"}
+          message="Enviar e-mail"
+          loading={loading}
           onPress={handleForgotPassword}
         />
       </View>
@@ -78,11 +81,11 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     gap: 12,
-    marginBottom: 25,
+    marginBottom: 8,
   },
   input_container: {
     display: "flex",
     gap: 10,
-    width: "90%",
+    width: "100%",
   },
 });

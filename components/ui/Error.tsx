@@ -1,31 +1,8 @@
-import {
-  Roboto_400Regular,
-  Roboto_700Bold,
-  useFonts,
-} from "@expo-google-fonts/roboto";
-import React from "react";
+import { colors } from "@/theme/vitrine";
 import { StyleSheet, Text } from "react-native";
 
-type Props = {
-  message: string;
-};
-
-export default function ErrorComponent({ message }: Props) {
-  const [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-  });
-
-  if (!fontsLoaded) return null;
-
-  return <Text style={[styles.text]}>{message}</Text>;
+export default function ErrorComponent({ message }: { message: string }) {
+  return <Text accessibilityRole="alert" style={styles.error}>{message}</Text>;
 }
 
-const styles = StyleSheet.create({
-  text: {
-    fontFamily: "Roboto_400Regular",
-    marginTop: 6,
-    fontSize: 14,
-    color: "red",
-  },
-});
+const styles = StyleSheet.create({ error: { marginTop: 4, color: colors.danger, fontSize: 12, fontWeight: "600" } });

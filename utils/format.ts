@@ -1,5 +1,5 @@
 export function formatCurrency(value?: number) {
-  if (!value) return "-";
+  if (value == null || !Number.isFinite(value)) return "-";
 
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",

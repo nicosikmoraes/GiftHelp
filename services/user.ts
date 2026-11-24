@@ -13,14 +13,9 @@ export async function updateUser(payload: UpdateUserPayload) {
   return response.data;
 }
 
-export async function searchUsers(name: string) {
-  try {
-    const response = await api.get("/users/search", {
-      params: { name },
-    });
+export type SearchUser = { id: number; name: string };
 
-    return response.data;
-  } catch (error: any) {
-    throw error;
-  }
+export async function searchUsers(name: string, signal?: AbortSignal) {
+  const response = await api.get<SearchUser[]>("/users/search", { params: { name }, signal });
+  return response.data;
 }

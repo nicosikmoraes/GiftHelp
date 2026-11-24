@@ -1,20 +1,12 @@
-import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
-import CenteredTemplate from "@/components/template/Default";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PostcardTemplate from "@/components/auth/PostcardTemplate";
 import Input from "@/components/ui/Input";
 import PressableComponent from "@/components/ui/Pressable";
-import TextComponent from "@/components/ui/Text";
-import TitleComponent from "@/components/ui/Title";
 import { useAuth } from "@/hooks/useAuth";
-import { showToast } from "@/utils/toast";
-import { Link, router, useFocusEffect } from "expo-router";
+import { colors } from "@/theme/vitrine";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
-
-enum TypeError {
-  Password,
-  Email,
-  None,
-}
+import { Pressable, StyleSheet, Text } from "react-native";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -38,29 +30,27 @@ export default function Login() {
 
   function validateInputs() {
     const newErrors: typeof errors = {};
-    if (!email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+    if (!email.trim()) newErrors.email = "Informe seu e-mail.";
+    else if (!/\S+@\S+\.\S+/.test(email.trim())) newErrors.email = "Confira o e-mail.";
 
-    if (!password.trim()) newErrors.password = "Password is required";
+    if (!password.trim()) newErrors.password = "Informe sua senha.";
     else if (password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "Use pelo menos 6 caracteres.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
   async function handleLogin() {
-    if (!validateInputs()) return;
+    if (loading || !validateInputs()) return;
 
     try {
       setLoading(true);
-      await signIn(email, password);
+      await signIn(email.trim(), password);
       router.replace("/(auth)/home");
-      showToast("Loged with success", "success");
-    } catch (err: any) {
+    } catch {
       setErrors({
-        email: "Email or password is incorrect",
-        password: "Email or password is incorrect",
+        password: "Não foi possível entrar. Confira seus dados e a conexão.",
       });
       setPassword("");
     } finally {
@@ -69,109 +59,35 @@ export default function Login() {
   }
 
   return (
-    <CenteredTemplate>
-      <View style={styles.title_container}>
-        <TitleComponent message="welcome back" fontSize={36} />
-
-        <TextComponent
-          message="Sign in to your account"
-          opacity={0.3}
-          color="#FFFFFF"
-          fontSize={15}
-        />
-      </View>
-
-      <View style={styles.input_container}>
-        <GoogleLoginButton />
-
-        <Input
-          placeholder="Email"
-          value={email}
-          borderError={errors.email ? "red" : "transparent"}
-          onChangeText={(text) => {
-            setEmail(text);
-            setErrors({});
-          }}
-          keyboardType="email-address"
-          error={errors.email}
-        />
-
-        <View>
-          <Input
-            placeholder="Password"
-            value={password}
-            borderError={errors.password ? "red" : "transparent"}
-            onChangeText={(text) => {
-              setPassword(text);
-              setErrors({});
-            }}
-            secureTextEntry
-            autoComplete="new-password"
-            error={errors.password}
-          />
-
-          <View style={styles.forgot_password_container}>
-            <TextComponent
-              message="Forgot Password?"
-              textAlign="left"
-              color="#E65C00"
-              fontWeight={900}
-              fontSize={12}
-              onPress={() => router.push("/forgot-password")}
-            />
-          </View>
-        </View>
-
-        <PressableComponent
-          message={"Send"}
-          marginTop={10}
-          loading={loading}
-          onPress={handleLogin}
-        />
-      </View>
-
-      <View style={styles.link_container}>
-        <TextComponent
-          message="Don't have an account?"
-          fontSize={14}
-          fontWeight={"regular"}
-          color="#FFFFFF"
-        />
-        <Link href="/register" style={styles.link_login}>
-          Create account
-        </Link>
-      </View>
-    </CenteredTemplate>
+    <PostcardTemplate screen="login" title="Bom te ver de novo.">
+      <Input
+        label="E-mail"
+        placeholder="voce@exemplo.com"
+        value={email}
+        onChangeText={(text) => { setEmail(text); setErrors((last) => ({ ...last, email: undefined })); }}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        error={errors.email}
+      />
+      <PasswordInput
+        label="Senha"
+        placeholder="Sua senha"
+        value={password}
+        onChangeText={(text) => { setPassword(text); setErrors((last) => ({ ...last, password: undefined })); }}
+        autoComplete="current-password"
+        onSubmitEditing={handleLogin}
+        error={errors.password}
+      />
+      <Pressable accessibilityRole="link" onPress={() => router.push("/forgot-password")} style={styles.forgot}>
+        <Text style={styles.forgotLabel}>Esqueci a senha</Text>
+      </Pressable>
+      <PressableComponent message="Entrar" loading={loading} onPress={handleLogin} />
+    </PostcardTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  title_container: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 25,
-  },
-
-  input_container: {
-    display: "flex",
-    gap: 10,
-    width: "90%",
-  },
-
-  link_login: {
-    alignSelf: "center",
-    color: "#E65C00",
-    opacity: 0.9,
-  },
-
-  link_container: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 5,
-  },
-
-  forgot_password_container: {
-    marginTop: 10,
-  },
+  forgot: { alignSelf: "flex-end", minHeight: 44, justifyContent: "center", paddingHorizontal: 2, marginVertical: -4 },
+  forgotLabel: { color: colors.action, fontSize: 13, fontWeight: "800" },
 });

@@ -1,154 +1,76 @@
-import { markAsPurchased } from "@/services/gift";
+import Button from "@/components/ui/Pressable";
+import Sheet from "@/components/ui/Sheet";
+import { markAsPurchased, type Gift } from "@/services/gift";
+import { colors, radius, serif, space } from "@/theme/vitrine";
 import { formatCurrency } from "@/utils/format";
-import { getGiftStyle } from "@/utils/giftStyle";
 import { showToast } from "@/utils/toast";
-import { Ionicons } from "@expo/vector-icons";
-import { Modal, StyleSheet, View } from "react-native";
-import PressableComponent from "../ui/Pressable";
-import IconButton from "../ui/PressableIcon";
-import TextComponent from "../ui/Text";
-import TitleComponent from "../ui/Title";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import GiftArt from "./GiftArt";
 
-type Gift = {
-  id: number;
-  name: string;
-  type: string;
-  price?: number;
-  description?: string;
-  color?: string;
-  quantity: number;
-};
+type Props = { gift: Gift; onClose: () => void; onPurchased: (id: number) => void };
 
-type Props = {
-  visible: boolean;
-  gift: Gift | null;
-  onClose: () => void;
-};
+export default function GiftModal({ gift, onClose, onPurchased }: Props) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-export default function GiftModal({ visible, gift, onClose }: Props) {
-  const { icon, color } = getGiftStyle(gift?.type);
-
-  async function handleMarkAsBought() {
-    if (!gift) return;
-
+  async function purchase() {
+    if (loading) return;
+    setLoading(true);
+    setError("");
     try {
       await markAsPurchased(gift.id);
-
-      showToast("Gift marked as purchased", "success");
-
-      onClose();
-    } catch (error) {
-      showToast("Error updating gift", "danger");
+      onPurchased(gift.id);
+      showToast("Presente marcado como comprado", "success");
+    } catch {
+      setError("Não foi possível atualizar o presente. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   }
+
+  const price = gift.price == null || gift.price === "" ? null : Number(gift.price);
+  const facts = [
+    { label: "Preço estimado", value: price !== null && Number.isFinite(price) ? formatCurrency(price) : null },
+    { label: "Cor", value: gift.color },
+    { label: "Quantidade", value: gift.quantity && gift.quantity > 1 ? gift.quantity : null },
+  ].filter(({ value }) => value != null && value !== "");
+
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          {gift && (
-            <>
-              <View style={styles.titulo_container}>
-                <View
-                  style={[styles.icon_container, { backgroundColor: color }]}
-                >
-                  <IconButton
-                    icon={<Ionicons name={icon} size={45} color="#1A1A1A" />}
-                    size={45}
-                  />
-                </View>
-
-                <View style={styles.titulo_detalhe}>
-                  <TitleComponent
-                    message={`${gift.name} - ${gift.type}`}
-                    fontSize={16}
-                  />
-                </View>
-
-                <View style={styles.times}>
-                  <IconButton
-                    icon={<Ionicons name="close" size={20} color="#BF0000" />}
-                    onPress={onClose}
-                    size={20}
-                  />
-                </View>
-              </View>
-
-              <View style={styles.info_container}>
-                {gift.description && (
-                  <TextComponent
-                    message={gift.description}
-                    textAlign="left"
-                    color="#9A9A9A"
-                  />
-                )}
-                {gift.price && (
-                  <TextComponent
-                    message={`Estimate price: ${formatCurrency(gift.price)}`}
-                  />
-                )}
-                {gift.quantity > 1 && (
-                  <TextComponent message={`Quantity: ${gift.quantity}`} />
-                )}
-                {gift.color && (
-                  <TextComponent message={`Color: ${gift.color ?? "-"}`} />
-                )}
-              </View>
-
-              <PressableComponent
-                message="Set as bought"
-                onPress={handleMarkAsBought}
-                marginTop={20}
-              />
-            </>
-          )}
+    <Sheet visible title="Presente" onClose={() => { if (!loading) onClose(); }}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <View style={styles.summary}>
+          <View style={styles.art}><GiftArt type={gift.type} /></View>
+          <View style={styles.nameBlock}>
+            <Text style={styles.category}>{gift.type}</Text>
+            <Text accessibilityRole="header" style={styles.name}>{gift.name}</Text>
+          </View>
         </View>
-      </View>
-    </Modal>
+        {facts.length > 0 && <View style={styles.facts}>
+          {facts.map(({ label, value }) => <View key={label} style={styles.fact}>
+            <Text style={styles.label}>{label}</Text><Text style={styles.value}>{value}</Text>
+          </View>)}
+        </View>}
+        {gift.description ? <Text style={styles.description}>{gift.description}</Text> : null}
+        {error !== "" && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
+        <Button message="Marcar como comprado" loading={loading} onPress={purchase} />
+      </ScrollView>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  container: {
-    width: "90%",
-    backgroundColor: "#1A1A1A",
-    padding: 20,
-    borderRadius: 10,
-    gap: 10,
-  },
-  icon_container: {
-    height: 65,
-    width: 65,
-    borderRadius: 4,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  titulo_container: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 10,
-  },
-  titulo_detalhe: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    width: 180,
-  },
-  info_container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-  },
-  times: {
-    marginLeft: "auto",
-  },
+  scroll: { flexShrink: 1 },
+  content: { gap: space.gap, paddingBottom: 3 },
+  summary: { alignItems: "center", flexDirection: "row", gap: space.gap, paddingBottom: space.gap, borderBottomWidth: 1, borderColor: colors.line },
+  art: { width: 68, height: 63 },
+  nameBlock: { flex: 1, minWidth: 0, gap: 3 },
+  name: { fontFamily: serif, fontSize: 24, color: colors.ink },
+  category: { color: colors.action, textTransform: "uppercase", fontSize: 11, fontWeight: "800", letterSpacing: 0.9 },
+  facts: { flexDirection: "row", flexWrap: "wrap", gap: space.compact },
+  fact: { flex: 1, minWidth: 93, borderRadius: radius.control, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.field, padding: 8 },
+  label: { color: colors.muted, fontSize: 12 },
+  value: { color: colors.ink, fontWeight: "800", marginTop: 3 },
+  description: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+  error: { color: colors.danger },
 });
